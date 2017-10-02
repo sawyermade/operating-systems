@@ -1,4 +1,4 @@
-# Operating Systems Project 2
+# Operating Systems Project 2 Shared Memory & Semaphores
 
 ## Compilation
 $ gcc danielsawyer-pj2.c
