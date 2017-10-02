@@ -18,6 +18,8 @@ int semid;
 static struct sembuf OP = {0,-1,0}; //waits and locks values
 static struct sembuf OV = {0,1,0}; //unlocks values
 struct sembuf *P = &OP, *V = &OV; //ptrs for above 2
+#define SEMKEY (key_t)400L //key for semget()
+#define NSEMS 1 //number of semaphores
 
 //functions
 void process(int* shm, int pnum, int increment); //process func
@@ -45,7 +47,7 @@ int main() {
 	}
 	
 	//gets semaphore and sets val to 1
-	semid = semget(6969, 1, IPC_CREAT | 0666);
+	semid = semget(SEMKEY, NSEMS, IPC_CREAT | 0666);
 	if(semid == -1) {
 		fprintf(stderr, "\nAssigning semaphore failed.\n");
 		return 1;
