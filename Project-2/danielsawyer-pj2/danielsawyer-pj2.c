@@ -49,7 +49,7 @@ int main() {
 	//gets semaphore and sets val to 1
 	semid = semget(SEMKEY, NSEMS, IPC_CREAT | 0666);
 	if(semid == -1) {
-		fprintf(stderr, "\nAssigning semaphore failed.\n");
+		fprintf(stderr, "\nGetting semaphore ID failed.\n");
 		return 1;
 	}
 	semunion arg;
