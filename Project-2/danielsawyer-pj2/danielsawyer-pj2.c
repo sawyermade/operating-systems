@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include <sys/sem.h>
 
-//semaphore union struct
+//semaphore union typedef
 typedef union{
 	int val;
 	struct semid_ds *buf;
