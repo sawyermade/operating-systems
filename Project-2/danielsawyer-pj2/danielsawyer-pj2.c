@@ -23,8 +23,8 @@ struct sembuf *P = &OP, *V = &OV; //ptrs for above 2
 
 //functions
 void process(int* shm, int pnum, int increment); //process func
-int POP(){int status; status = semop(semid, P, 1); return status;} //waits and locks func
-int VOP(){int status; status = semop(semid, V, 1); return status;} //unlocks func
+int POP(){return semop(semid, P, 1);} //waits and locks func
+int VOP(){return semop(semid, V, 1);} //unlocks func
 
 
 int main() {
@@ -36,21 +36,21 @@ int main() {
 	shmid = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | 0666);
 	if(shmid < 0) {
 		fprintf(stderr, "\nCreating shared memory failed.\n");
-		return 1;
+		exit(EXIT_FAILURE);
 	}
 
 	//attaches shared mem to parent process. erorrs if failed.
 	shm = shmat(shmid, NULL, 0);
 	if(shm == (int*)-1) {
 		fprintf(stderr, "\nAssigning shared memory failed.\n");
-		return 1;
+		exit(EXIT_FAILURE);
 	}
 	
 	//gets semaphore and sets val to 1
 	semid = semget(SEMKEY, NSEMS, IPC_CREAT | 0666);
 	if(semid == -1) {
 		fprintf(stderr, "\nGetting semaphore ID failed.\n");
-		return 1;
+		exit(EXIT_FAILURE);
 	}
 	semunion arg;
 	arg.val = 1;
@@ -70,14 +70,20 @@ int main() {
 
 	//detaches and clears shared memory
 	shmdt(shm);
-	shmctl(shmid, IPC_RMID, NULL);
+	if(shmctl(shmid, IPC_RMID, NULL) < 0) {
+		fprintf(stderr, "\nRemoving shared memory ID %d failed.\n", shmid);
+		exit(EXIT_FAILURE);
+	}
 
 	//removes semaphore
-	semctl(semid, 0, IPC_RMID);
+	if(semctl(semid, 0, IPC_RMID) < 0) {
+		fprintf(stderr, "\nRemoving semaphore ID %d failed.\n", semid);
+		exit(EXIT_FAILURE);
+	}
 
 	//end of program
 	printf("\nEnd of Program\n");
-	return 0;
+	exit(EXIT_SUCCESS);
 }
 
 //runs child processes with protected shm
@@ -92,5 +98,5 @@ void process(int* shm, int pnum, int increment) {
 
 	printf("From Process %d: counter = %d\n", pnum, *shm);
 	shmdt(shm);
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
