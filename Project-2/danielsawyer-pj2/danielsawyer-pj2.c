@@ -72,13 +72,13 @@ int main() {
 	shmdt(shm);
 	if(shmctl(shmid, IPC_RMID, NULL) < 0) {
 		fprintf(stderr, "\nRemoving shared memory ID %d failed.\n", shmid);
-		exit(EXIT_FAILURE);
+		//exit(EXIT_FAILURE);
 	}
 
 	//removes semaphore
 	if(semctl(semid, 0, IPC_RMID) < 0) {
 		fprintf(stderr, "\nRemoving semaphore ID %d failed.\n", semid);
-		exit(EXIT_FAILURE);
+		//exit(EXIT_FAILURE);
 	}
 
 	//end of program
