@@ -1,15 +1,13 @@
-//#define _REENTRANT
+#define _REENTRANT
 #include <pthread.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
-//#include <fcntl.h>
+#include <fcntl.h>
 #include <semaphore.h>
-#include <unistd.h>
 
-//constants and shit
 #define BUFFSIZE 15
 
 //pthread parameter struct
@@ -21,7 +19,7 @@ typedef struct ptparam {
 
 int main() {
 
- 	//file open stuff
+	//
 	FILE *fp;
 	fp = fopen("mytest.dat", "r");
 	if(!fp) {
@@ -29,7 +27,7 @@ int main() {
 		return -1;
 	}
 
-	//shared memory parameter struct for threads
+	//shared memory parameter struct
 	ptparam buff;
 
 	//
@@ -51,31 +49,26 @@ int main() {
 	sem_init(&buff.full, 0, 0);
 	sem_init(&buff.empty, 0, BUFFSIZE);
 
-	//thread vars
 	pthread_t pro, con;
 	pthread_attr_t attr;
 
-	//setup threads
 	fflush(stdout);
+
 	pthread_attr_init(&attr);
 	pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
 
 
 
-
-
 	//detaches and clears shared memory
 	shmdt(buff.shmbuf);
-	if(shmctl(buff.shmid, IPC_RMID, NULL) < 0)
+	if(shmctl(buff.shmid, IPC_RMID, NULL) < 0) {
 		printf("\nRemoving shared memory ID %d failed.\n", buff.shmid);
+	}
 
 	//destroy semaphores
 	sem_destroy(&buff.mutex);
 	sem_destroy(&buff.full);
 	sem_destroy(&buff.empty);
 
-	sleep(1);
-
-printf("\nEND OF SHIT MOTHER FUCKER\n");
 	return 0;
 }
