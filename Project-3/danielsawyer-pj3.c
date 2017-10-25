@@ -5,51 +5,59 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
-//#include <fcntl.h>
+#include <fcntl.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-//constants and shit
+//constants/globals
 #define BUFFSIZE 15
+// FILE *fp;
 
 //pthread parameter struct
 typedef struct ptparam {
 	sem_t mutex, full, empty;
-	char *shmbuf;
-	int shmid;
+	char buff[BUFFSIZE];
+	FILE *fp;
 } ptparam;
+
+//functions
+void *producer(void *buff);
+void *consumer(void *buff);
 
 int main() {
 
- 	//file open stuff
-	FILE *fp;
-	fp = fopen("mytest.dat", "r");
+	//file open stuff
+	FILE *fp = fopen("mytest.dat", "r");
 	if(!fp) {
 		printf("\nCould not open file mytest.dat\n");
 		return -1;
 	}
 
 	//shared memory parameter struct for threads
-	ptparam buff;
+	ptparam *buff;
 
 	//
-	buff.shmid = shmget(IPC_PRIVATE, sizeof(char)*BUFFSIZE, IPC_CREAT | 0666);
-	if(buff.shmid < 0) {
+	int shmid = shmget(IPC_PRIVATE, sizeof(ptparam), IPC_CREAT | 0666);
+	if(shmid < 0) {
 		printf("\nCreating shared memory failed.\n");
 		return -1;
 	}
 
 	//attaches shared mem to parent process. erorrs if failed.
-	buff.shmbuf = shmat(buff.shmid, NULL, 0);
-	if(buff.shmbuf == (char*)-1) {
+	buff = shmat(shmid, NULL, 0);
+	if(buff == (ptparam*)-1) {
 		printf("\nAssigning shared memory failed.\n");
 		return -1;
 	}
 
+	//sets file pointer into shared mem
+	buff->fp = fp;
+
 	//semaphore init
-	sem_init(&buff.mutex, 0, 1);
-	sem_init(&buff.full, 0, 0);
-	sem_init(&buff.empty, 0, BUFFSIZE);
+	sem_init(&buff->mutex, 0, 1);
+	sem_init(&buff->full, 0, 0);
+	sem_init(&buff->empty, 0, BUFFSIZE);
 
 	//thread vars
 	pthread_t pro, con;
@@ -60,22 +68,71 @@ int main() {
 	pthread_attr_init(&attr);
 	pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
 
-
-
-
-
-	//detaches and clears shared memory
-	shmdt(buff.shmbuf);
-	if(shmctl(buff.shmid, IPC_RMID, NULL) < 0)
-		printf("\nRemoving shared memory ID %d failed.\n", buff.shmid);
+	//creates threads and waits for them to finish
+	pthread_create(&pro, &attr, producer, buff);
+	pthread_create(&con, &attr, consumer, buff);
+	pthread_join(pro, NULL);
+	pthread_join(con, NULL);
 
 	//destroy semaphores
-	sem_destroy(&buff.mutex);
-	sem_destroy(&buff.full);
-	sem_destroy(&buff.empty);
+	sem_destroy(&buff->mutex);
+	sem_destroy(&buff->full);
+	sem_destroy(&buff->empty);
 
-	sleep(1);
+	//detaches and clears shared memory
+	shmdt(buff);
+	if(shmctl(shmid, IPC_RMID, NULL) < 0)
+		printf("\nRemoving shared memory ID %d failed.\n", shmid);
 
-printf("\nEND OF SHIT MOTHER FUCKER\n");
+	fclose(fp);
+	printf("\n");
 	return 0;
+}
+
+//
+void *producer(void *buff) {
+
+	//
+	int i = 0, stop = 0;
+	char c;
+	while(i++ < 150 && (c = getc(((ptparam*)buff)->fp)) != EOF) {
+
+		sem_wait(&((ptparam*)buff)->empty);
+		sem_wait(&((ptparam*)buff)->mutex);
+
+		((ptparam*)buff)->buff[i%BUFFSIZE] = c;
+
+		sem_post(&((ptparam*)buff)->mutex);
+		sem_post(&((ptparam*)buff)->full);
+	}
+
+	sem_wait(&((ptparam*)buff)->empty);
+	sem_wait(&((ptparam*)buff)->mutex);
+
+	((ptparam*)buff)->buff[i%BUFFSIZE] = '*';
+
+	sem_post(&((ptparam*)buff)->mutex);
+	sem_post(&((ptparam*)buff)->full);
+}
+
+//
+void *consumer(void *buff) {
+
+	//
+	int i = 0, stop = 0;
+	char c = '0';
+	while(i++ < 150 && c != '*') {
+
+		//sleep(1);
+
+		sem_wait(&((ptparam*)buff)->full);
+		sem_wait(&((ptparam*)buff)->mutex);
+
+		c = ((ptparam*)buff)->buff[i%BUFFSIZE];
+		if(c != '*')
+			printf("%c", ((ptparam*)buff)->buff[i%BUFFSIZE]);
+
+		sem_post(&((ptparam*)buff)->mutex);
+		sem_post(&((ptparam*)buff)->empty);
+	}
 }
