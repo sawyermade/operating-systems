@@ -12,7 +12,6 @@
 
 //constants/globals
 #define BUFFSIZE 15
-// FILE *fp;
 
 //pthread parameter struct
 typedef struct ptparam {
@@ -37,7 +36,7 @@ int main() {
 	//shared memory parameter struct for threads
 	ptparam *buff;
 
-	//
+	//creates shared mem
 	int shmid = shmget(IPC_PRIVATE, sizeof(ptparam), IPC_CREAT | 0666);
 	if(shmid < 0) {
 		printf("\nCreating shared memory failed.\n");
@@ -84,15 +83,15 @@ int main() {
 	if(shmctl(shmid, IPC_RMID, NULL) < 0)
 		printf("\nRemoving shared memory ID %d failed.\n", shmid);
 
+	//closes file and ends
 	fclose(fp);
 	printf("\n");
 	return 0;
 }
 
-//
+//producer function
 void *producer(void *buff) {
 
-	//
 	int i = 0, stop = 0;
 	char c;
 	while(i++ < 150 && (c = getc(((ptparam*)buff)->fp)) != EOF) {
@@ -115,22 +114,19 @@ void *producer(void *buff) {
 	sem_post(&((ptparam*)buff)->full);
 }
 
-//
+//consumer function
 void *consumer(void *buff) {
 
-	//
 	int i = 0, stop = 0;
 	char c = '0';
 	while(i++ < 150 && c != '*') {
-
-		//sleep(1);
 
 		sem_wait(&((ptparam*)buff)->full);
 		sem_wait(&((ptparam*)buff)->mutex);
 
 		c = ((ptparam*)buff)->buff[i%BUFFSIZE];
 		if(c != '*')
-			printf("%c", ((ptparam*)buff)->buff[i%BUFFSIZE]);
+			printf("%c", c);
 
 		sem_post(&((ptparam*)buff)->mutex);
 		sem_post(&((ptparam*)buff)->empty);
