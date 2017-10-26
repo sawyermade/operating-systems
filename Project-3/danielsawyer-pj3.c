@@ -99,11 +99,11 @@ void *producer(void *p) {
 
 		//writes to buffer
 		buff->buff[i % BUFFSIZE] = c;
+		i++;
 
 		//increments mutex and full
 		sem_post(&buff->mutex);
 		sem_post(&buff->full);
-		i++;
 	}
 
 	//writes the final * stopping char into buffer
@@ -130,12 +130,12 @@ void *consumer(void *p) {
 
 		//reads from the buffer and prints unless its *
 		c = buff->buff[i % BUFFSIZE];
+		i++;
 		if(c != '*')
 			printf("%c", c);
 
 		//increments mutex and empty
 		sem_post(&buff->mutex);
 		sem_post(&buff->empty);
-		i++;
 	}
 }
