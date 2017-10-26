@@ -98,19 +98,18 @@ void *producer(void *p) {
 		sem_wait(&buff->mutex);
 
 		//writes to buffer
-		buff->buff[i % BUFFSIZE] = c;
-		i++;
+		buff->buff[i % BUFFSIZE] = c; i++;
 
 		//increments mutex and full
 		sem_post(&buff->mutex);
 		sem_post(&buff->full);
 	}
 
-	//writes the final * stopping char into buffer
+	//writes the final stopping char into buffer
 	sem_wait(&buff->empty);
 	sem_wait(&buff->mutex);
 
-	buff->buff[i % BUFFSIZE] = '*';
+	buff->buff[i % BUFFSIZE] = -1;
 
 	sem_post(&buff->mutex);
 	sem_post(&buff->full);
@@ -122,16 +121,15 @@ void *consumer(void *p) {
 	int i = 0;
 	char c = '0';
 	ptparam *buff = (ptparam*)p;
-	while(c != '*') {
+	while(c != -1) {
 
 		//waits till full and mutex are positive and decrements
 		sem_wait(&buff->full);
 		sem_wait(&buff->mutex);
 
 		//reads from the buffer and prints unless its *
-		c = buff->buff[i % BUFFSIZE];
-		i++;
-		if(c != '*')
+		c = buff->buff[i % BUFFSIZE]; i++;
+		if(c != -1)
 			printf("%c", c);
 
 		//increments mutex and empty
