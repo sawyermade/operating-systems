@@ -1,16 +1,11 @@
-//#define _REENTRANT
-#include <pthread.h>
 #include <stdio.h>
-//#include <sys/types.h>
+#include <semaphore.h>
+#include <pthread.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <sys/wait.h>
-//#include <fcntl.h>
-#include <semaphore.h>
-//#include <unistd.h>
-//#include <stdlib.h>
+// #include <sys/wait.h>
 
-//constants/globals
+//constant buffer size
 #define BUFFSIZE 15
 
 //pthread parameter struct
@@ -21,8 +16,8 @@ typedef struct ptparam {
 } ptparam;
 
 //functions
-void *producer(void *buff);
-void *consumer(void *buff);
+void *producer(void *p);
+void *consumer(void *p);
 
 int main() {
 
@@ -90,46 +85,54 @@ int main() {
 }
 
 //producer function
-void *producer(void *buff) {
+void *producer(void *p) {
 
-	int i = 0, stop = 0;
+	int i = 0;
 	char c;
-	while(i++ < 150 && (c = getc(((ptparam*)buff)->fp)) != EOF) {
+	ptparam *buff = (ptparam*)p;
+	while(i++ < 150 && (c = getc(buff->fp)) != EOF) {
 
-		sem_wait(&((ptparam*)buff)->empty);
-		sem_wait(&((ptparam*)buff)->mutex);
+		//waits till empty and mutex are positive and decrements
+		sem_wait(&buff->empty);
+		sem_wait(&buff->mutex);
 
-		((ptparam*)buff)->buff[i%BUFFSIZE] = c;
+		//writes to buffer
+		buff->buff[i % BUFFSIZE] = c;
 
-		sem_post(&((ptparam*)buff)->mutex);
-		sem_post(&((ptparam*)buff)->full);
+		//increments mutex and full
+		sem_post(&buff->mutex);
+		sem_post(&buff->full);
 	}
 
-	sem_wait(&((ptparam*)buff)->empty);
-	sem_wait(&((ptparam*)buff)->mutex);
+	//writes the final * stopping char into buffer
+	sem_wait(&buff->empty);
+	sem_wait(&buff->mutex);
 
-	((ptparam*)buff)->buff[i%BUFFSIZE] = '*';
+	buff->buff[i % BUFFSIZE] = '*';
 
-	sem_post(&((ptparam*)buff)->mutex);
-	sem_post(&((ptparam*)buff)->full);
+	sem_post(&buff->mutex);
+	sem_post(&buff->full);
 }
 
 //consumer function
-void *consumer(void *buff) {
+void *consumer(void *p) {
 
-	int i = 0, stop = 0;
+	int i = 0;
 	char c = '0';
+	ptparam *buff = (ptparam*)p;
 	while(i++ < 150 && c != '*') {
 
-		sem_wait(&((ptparam*)buff)->full);
-		sem_wait(&((ptparam*)buff)->mutex);
+		//waits till full and mutex are positive and decrements
+		sem_wait(&buff->full);
+		sem_wait(&buff->mutex);
 
-		c = ((ptparam*)buff)->buff[i%BUFFSIZE];
+		//reads from the buffer and prints unless its *
+		c = buff->buff[i % BUFFSIZE];
 		if(c != '*')
 			printf("%c", c);
-		//sleep(1);
-		sem_post(&((ptparam*)buff)->mutex);
-		sem_post(&((ptparam*)buff)->empty);
-		//sleep(1);
+
+		//increments mutex and empty
+		sem_post(&buff->mutex);
+		sem_post(&buff->empty);
 	}
 }
