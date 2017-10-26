@@ -1,14 +1,14 @@
 //#define _REENTRANT
 #include <pthread.h>
 #include <stdio.h>
-#include <sys/types.h>
+//#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 #include <semaphore.h>
-#include <unistd.h>
-#include <stdlib.h>
+//#include <unistd.h>
+//#include <stdlib.h>
 
 //constants/globals
 #define BUFFSIZE 15
@@ -127,8 +127,9 @@ void *consumer(void *buff) {
 		c = ((ptparam*)buff)->buff[i%BUFFSIZE];
 		if(c != '*')
 			printf("%c", c);
-
+		//sleep(1);
 		sem_post(&((ptparam*)buff)->mutex);
 		sem_post(&((ptparam*)buff)->empty);
+		//sleep(1);
 	}
 }
