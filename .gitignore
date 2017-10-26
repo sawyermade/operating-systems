@@ -50,4 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Mine
 pj3
+danielsawyer-pj3.zip

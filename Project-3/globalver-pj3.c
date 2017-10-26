@@ -70,7 +70,7 @@ int main() {
 //producer function
 void *producer(void *parm) {
 
-	int i = 0, stop = 0;
+	int i = 0;
 	char c;
 	while(i++ < 150 && (c = getc(fp)) != EOF) {
 
@@ -95,7 +95,7 @@ void *producer(void *parm) {
 //consumer function
 void *consumer(void *parm) {
 
-	int i = 0, stop = 0;
+	int i = 0;
 	char c = '0';
 	while(i++ < 150 && c != '*') {
 

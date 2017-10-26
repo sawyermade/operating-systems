@@ -5,8 +5,9 @@
 #include <sys/shm.h>
 // #include <sys/wait.h>
 
-//constant buffer size
+//constants
 #define BUFFSIZE 15
+#define MAXCHAR 150
 
 //pthread parameter struct
 typedef struct ptparam {
@@ -45,7 +46,7 @@ int main() {
 		return -1;
 	}
 
-	//sets file pointer into shared mem
+	//sets file pointer into shared mem & sets flag
 	buff->fp = fp;
 
 	//semaphore init
@@ -90,7 +91,7 @@ void *producer(void *p) {
 	int i = 0;
 	char c;
 	ptparam *buff = (ptparam*)p;
-	while(i++ < 150 && (c = getc(buff->fp)) != EOF) {
+	while(i < MAXCHAR && (c = getc(buff->fp)) != EOF) {
 
 		//waits till empty and mutex are positive and decrements
 		sem_wait(&buff->empty);
@@ -102,6 +103,7 @@ void *producer(void *p) {
 		//increments mutex and full
 		sem_post(&buff->mutex);
 		sem_post(&buff->full);
+		i++;
 	}
 
 	//writes the final * stopping char into buffer
@@ -120,7 +122,7 @@ void *consumer(void *p) {
 	int i = 0;
 	char c = '0';
 	ptparam *buff = (ptparam*)p;
-	while(i++ < 150 && c != '*') {
+	while(c != '*') {
 
 		//waits till full and mutex are positive and decrements
 		sem_wait(&buff->full);
@@ -134,5 +136,6 @@ void *consumer(void *p) {
 		//increments mutex and empty
 		sem_post(&buff->mutex);
 		sem_post(&buff->empty);
+		i++;
 	}
 }
