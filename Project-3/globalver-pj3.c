@@ -47,6 +47,7 @@ int main() {
 
 	//creates threads and waits for them to finish
 	pthread_create(&pro, &attr, producer, buff);
+	sleep(1);
 	pthread_create(&con, &attr, consumer, buff);
 	pthread_join(pro, NULL);
 	pthread_join(con, NULL);

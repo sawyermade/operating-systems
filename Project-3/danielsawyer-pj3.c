@@ -128,7 +128,7 @@ void *consumer(void *p) {
 		sem_wait(&buff->full);
 		sem_wait(&buff->mutex);
 
-		//reads from the buffer and prints unless its *
+		//reads from the buffer and prints unless its -1
 		c = buff->buff[i % BUFFSIZE]; i++;
 		if(c != -1)
 			printf("%c", c);
