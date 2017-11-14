@@ -1,0 +1,106 @@
+
+CPU NAIVE HISTOGRAM
+1    10030
+2    33
+3    11
+4    5
+5    5
+6    4
+7    1
+8    3
+9    1
+16    1
+20    1
+38    1
+CPU Naive Running Time on 10312 Nodes: 2680.588135 sec
+
+CPU OPTIMIZED HISTOGRAM
+1    10030
+2    33
+3    11
+4    5
+5    5
+6    4
+7    1
+8    3
+9    1
+16    1
+20    1
+38    1
+CPU Optimized Running Time on 10312 Nodes: 21.899899 sec
+
+GPU Naive HISTOGRAM
+1    10030
+2    33
+3    11
+4    5
+5    5
+6    4
+7    1
+8    3
+9    1
+16    1
+20    1
+38    1
+
+******** Naive Processed 10312 Node Graph In 116.30688 sec *******
+
+GPU OPT_1 HISTOGRAM
+1    10030
+2    33
+3    11
+4    5
+5    5
+6    4
+7    1
+8    3
+9    1
+16    1
+20    1
+38    1
+******** OPT_1 Processed 10312 Node Graph In 126.33046 sec *******
+
+GPU OPT_2 HISTOGRAM
+1    10030
+2    33
+3    11
+4    5
+5    5
+6    4
+7    1
+8    3
+9    1
+16    1
+20    1
+38    1
+******** OPT_2 Processed 10312 Node Graph In 16.61333 sec *******
+
+GPU OPT_3 HISTOGRAM
+1    10030
+2    33
+3    11
+4    5
+5    5
+6    4
+7    1
+8    3
+9    1
+16    1
+20    1
+38    1
+******** OPT_3 Processed 10312 Node Graph In 16.18829 sec *******
+
+GPU OPT_4 HISTOGRAM
+1    10030
+2    33
+3    11
+4    5
+5    5
+6    4
+7    1
+8    3
+9    1
+16    1
+20    1
+38    1
+******** OPT_4 Processed 10312 Node Graph In 10.08090 sec *******

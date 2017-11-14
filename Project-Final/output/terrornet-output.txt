@@ -1,0 +1,50 @@
+
+CPU NAIVE HISTOGRAM
+1    42
+2    5
+3    1
+4    2
+CPU Naive Running Time on 63 Nodes: 0.000657 sec
+
+CPU OPTIMIZED HISTOGRAM
+1    42
+2    5
+3    1
+4    2
+CPU Optimized Running Time on 63 Nodes: 0.000133 sec
+
+GPU Naive HISTOGRAM
+1    42
+2    5
+3    1
+4    2
+
+******** Naive Processed 63 Node Graph In 0.00409 sec *******
+
+GPU OPT_1 HISTOGRAM
+1    42
+2    5
+3    1
+4    2
+******** OPT_1 Processed 63 Node Graph In 0.00030 sec *******
+
+GPU OPT_2 HISTOGRAM
+1    42
+2    5
+3    1
+4    2
+******** OPT_2 Processed 63 Node Graph In 0.00376 sec *******
+
+GPU OPT_3 HISTOGRAM
+1    42
+2    5
+3    1
+4    2
+******** OPT_3 Processed 63 Node Graph In 0.00274 sec *******
+
+GPU OPT_4 HISTOGRAM
+1    42
+2    5
+3    1
+4    2
+******** OPT_4 Processed 63 Node Graph In 0.00274 sec *******
